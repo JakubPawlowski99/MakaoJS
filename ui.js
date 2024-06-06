@@ -1,8 +1,6 @@
-// ui.js
-export function renderHands(numPlayers, playerCards, opponentCards, playerHand) {    
-    playerHand.innerHTML = '';
-    
+export function renderHands(numPlayers, playerCards, opponentCards, playerHand, centerCard) {
     // Render player's cards
+    playerHand.innerHTML = '';
     playerCards.forEach(card => {
         playerHand.appendChild(createCardElement(card));
     });
@@ -14,6 +12,13 @@ export function renderHands(numPlayers, playerCards, opponentCards, playerHand) 
         opponentCards[i].forEach(card => {
             opponentHand.appendChild(createCardElement(card));
         });
+    }
+
+    // Render center card
+    const centerCardElement = document.getElementById('center-card');
+    centerCardElement.innerHTML = '';
+    if (centerCard) {
+        centerCardElement.appendChild(createCardElement(centerCard));
     }
 }
 

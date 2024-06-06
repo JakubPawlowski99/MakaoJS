@@ -4,12 +4,17 @@ import { renderHands } from './ui.js';
 let playerCards = [];
 let opponentCards = [[], [], []]; // For up to three opponents
 let deckCards = initializeDeck(); // Initialize deckCards here
+let centerCard = null; // Initialize centerCard here
 
-export { playerCards, opponentCards, initializeDeck, renderHands }; // Export playerCards, opponentCards, initializeDeck, and renderHands
+export { playerCards, opponentCards, initializeDeck, renderHands, centerCard }; // Export centerCard as well
+
 export function dealCards(numPlayers, playerHand) {
     // Clear previous hands
     playerCards = [];
     opponentCards = [[], [], []];
+ 
+    // Deal one card to the center area
+    centerCard = deckCards.pop();
 
     // Deal initial cards to players
     for (let i = 0; i < 5; i++) {
@@ -25,7 +30,8 @@ export function dealCards(numPlayers, playerHand) {
 
     console.log('Player cards:', playerCards);
     console.log('Opponent cards:', opponentCards);
-    renderHands(numPlayers, playerCards, opponentCards, playerHand); // Pass playerHand to renderHands
+    console.log('Card in play:', centerCard);
+    renderHands(numPlayers, playerCards, opponentCards, playerHand, centerCard); // Pass centerCard to renderHands
     return playerCards; // Return playerCards here
 }
 

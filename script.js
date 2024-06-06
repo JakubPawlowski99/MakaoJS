@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (numPlayers >= 2 && numPlayers <= 4) {
             playerSelection.style.display = 'none';
             document.getElementById('game-board').style.visibility = 'visible';
-            deckCards = initializeDeck();
-            playerCards = game.dealCards(numPlayers, playerHand); // Assign the result of dealCards to playerCards
+            deckCards = game.initializeDeck(); // Access initializeDeck through the game namespace
+            playerCards = game.dealCards(numPlayers, playerHand); // Call dealCards
         } else {
             alert('Please enter a valid number of players (2-4).');
         }
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add drawn card to the player's hand (assuming it's the player's turn)
             playerCards.push(drawnCard);
             // Update the UI to reflect the new card in the player's hand
-            renderHands(numPlayers, playerCards, game.opponentCards, playerHand);
+            renderHands(numPlayers, playerCards, game.opponentCards, playerHand, game.centerCard);
         }
     });
 });
