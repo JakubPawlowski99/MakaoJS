@@ -15,16 +15,16 @@ export class Card {
 
 export class PlusTwoCard extends Card {
     playEffect(game) {
-        console.log("Next player must draw 2 cards or counter with a 2 or 3 of the same suit.");
-        // Implement logic for +2 card
+        const nextPlayerIndex = (game.currentPlayerIndex + 1) % game.numPlayers;
+        game.players[nextPlayerIndex].drawCards(2);
+        game.updateLog(`${game.players[nextPlayerIndex].name} must draw 2 cards.`);
+        game.skipTurn();
     }
 }
 
 export class BlockCard extends Card {
     playEffect(game) {
-        console.log("Next player is blocked unless they have a 4.");
-        // Implement logic for block card
+        game.updateLog(`${game.players[(game.currentPlayerIndex + 1) % game.numPlayers].name} is blocked.`);
+        game.skipTurn();
     }
 }
-
-// Add other special cards (J, Q, K, A) similarly

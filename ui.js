@@ -1,34 +1,30 @@
 import * as game from './game.js';
 
-export function renderHands(numPlayers, playerCards, opponentCards, playerHand, centerCard) {
-    // Render player's cards
-    playerHand.innerHTML = '';
-    playerCards.forEach((card, index) => {
-        const cardElement = createCardElement(card);
-        cardElement.addEventListener('click', () => {
-            if (game.playCard(0, index)) {
-                renderHands(numPlayers, game.playerCards, game.opponentCards, playerHand, game.centerCard);
-            } else {
-                alert('Invalid move! Card must match the suit or rank of the center card.');
+export function renderHands() {
+    // Render each player's cards
+    for (let i = 0; i < game.numPlayers; i++) {
+        const playerHandElement = document.getElementById(i === 0 ? 'player-hand' : `player-${i + 1}`);
+        playerHandElement.innerHTML = '';
+        game.players[i].hand.forEach((card, index) => {
+            const cardElement = createCardElement(card);
+            if (i === 0) {
+                cardElement.addEventListener('click', () => {
+                    if (game.playCard(0, index)) {
+                        renderHands();
+                    } else {
+                        alert('Invalid move! Card must match the suit or rank of the center card.');
+                    }
+                });
             }
-        });
-        playerHand.appendChild(cardElement);
-    });
-
-    // Render opponents' cards
-    for (let i = 0; i < numPlayers - 1; i++) {
-        const opponentHand = document.getElementById(`player-${i + 2}`);
-        opponentHand.innerHTML = '';
-        opponentCards[i].forEach(card => {
-            opponentHand.appendChild(createCardElement(card));
+            playerHandElement.appendChild(cardElement);
         });
     }
 
     // Render center card
     const centerCardElement = document.getElementById('center-card');
     centerCardElement.innerHTML = '';
-    if (centerCard) {
-        centerCardElement.appendChild(createCardElement(centerCard));
+    if (game.centerCard) {
+        centerCardElement.appendChild(createCardElement(game.centerCard));
     }
 }
 
@@ -43,7 +39,6 @@ export function createCardElement(card) {
     suitElement.src = `suits/${card.suit}.png`;
     suitElement.alt = card.suit;
 
-    // Change color for hearts and diamonds to red
     if (card.suit === 'hearts' || card.suit === 'diamonds') {
         suitElement.style.filter = 'invert(20%) sepia(96%) saturate(2701%) hue-rotate(324deg) brightness(91%) contrast(102%)';
         rankElement.style.color = 'red';
