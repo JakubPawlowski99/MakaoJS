@@ -32,20 +32,20 @@ export function initializeGame(playersCount) {
     centerCard = deckCards.pop();
     currentPlayerIndex = 0;
 
-    // Create players
     players.length = 0;
     for (let i = 0; i < numPlayers; i++) {
         players.push(new Player(`Player ${i + 1}`));
     }
 
-    // Deal cards
     dealCards();
     renderHands();
 }
 
 export function updateLog(message) {
     const logElement = document.getElementById('game-log');
-    logElement.innerHTML += `<p>${message}</p>`;
+    if (logElement) {
+        logElement.innerHTML += `<p>${message}</p>`;
+    }
 }
 
 export function dealCards() {
@@ -64,6 +64,10 @@ export function drawCard() {
 }
 
 export function playCard(playerIndex, cardIndex) {
+    if (playerIndex !== currentPlayerIndex) {
+        alert("It's not your turn!");
+        return false;
+    }
     const card = players[playerIndex].hand[cardIndex];
     if (card.isValidMove(centerCard)) {
         centerCard = card;
@@ -75,11 +79,27 @@ export function playCard(playerIndex, cardIndex) {
             updateLog,
             skipTurn
         });
+        if (players[playerIndex].hand.length === 0) {
+            updateLog(`${players[playerIndex].name} wins the game!`);
+            endGame();
+        } else {
+            nextTurn();
+        }
         return true;
     }
     return false;
 }
 
+export function nextTurn() {
+    currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
+    renderHands();
+}
+
 export function skipTurn() {
     currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
+    renderHands();
+}
+
+function endGame() {
+    alert("Game Over");
 }

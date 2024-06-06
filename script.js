@@ -20,7 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('draw-card-btn').addEventListener('click', () => {
         const drawnCard = game.drawCard();
         if (drawnCard) {
-            game.players[0].hand.push(drawnCard);
+            game.players[game.currentPlayerIndex].hand.push(drawnCard);
+            game.updateLog(`${game.players[game.currentPlayerIndex].name} drew a card.`);
+            game.nextTurn();
             renderHands();
         }
     });
