@@ -4,15 +4,15 @@ import { renderHands } from './ui.js';
 let playerCards = [];
 let opponentCards = [[], [], []]; // For up to three opponents
 let deckCards = initializeDeck(); // Initialize deckCards here
-let centerCard = null; // Initialize centerCard here
+let centerCard = {}; // Initialize centerCard
 
-export { playerCards, opponentCards, initializeDeck, renderHands, centerCard }; // Export centerCard as well
+export { playerCards, opponentCards, initializeDeck, renderHands, centerCard }; // Export centerCard
 
 export function dealCards(numPlayers, playerHand) {
     // Clear previous hands
     playerCards = [];
     opponentCards = [[], [], []];
- 
+
     // Deal one card to the center area
     centerCard = deckCards.pop();
 
@@ -30,7 +30,8 @@ export function dealCards(numPlayers, playerHand) {
 
     console.log('Player cards:', playerCards);
     console.log('Opponent cards:', opponentCards);
-    console.log('Card in play:', centerCard);
+    console.log('Center card:', centerCard); // Log centerCard
+
     renderHands(numPlayers, playerCards, opponentCards, playerHand, centerCard); // Pass centerCard to renderHands
     return playerCards; // Return playerCards here
 }
@@ -42,4 +43,15 @@ export function drawCard() {
         console.log("Deck is empty!");
         return null;
     }
+}
+
+export function playCard(playerIndex, cardIndex) {
+    const card = playerCards[cardIndex];
+    if (card.isValidMove(centerCard)) {
+        centerCard = card;
+        playerCards.splice(cardIndex, 1);
+        card.playEffect({ /* game state here */ });
+        return true;
+    }
+    return false;
 }

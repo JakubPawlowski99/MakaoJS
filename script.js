@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             playerSelection.style.display = 'none';
             document.getElementById('game-board').style.visibility = 'visible';
             deckCards = game.initializeDeck(); // Access initializeDeck through the game namespace
-            playerCards = game.dealCards(numPlayers, playerHand); // Call dealCards
+            playerCards = game.dealCards(numPlayers, playerHand); // Access dealCards through the game namespace
         } else {
             alert('Please enter a valid number of players (2-4).');
         }

@@ -1,8 +1,18 @@
+import * as game from './game.js';
+
 export function renderHands(numPlayers, playerCards, opponentCards, playerHand, centerCard) {
     // Render player's cards
     playerHand.innerHTML = '';
-    playerCards.forEach(card => {
-        playerHand.appendChild(createCardElement(card));
+    playerCards.forEach((card, index) => {
+        const cardElement = createCardElement(card);
+        cardElement.addEventListener('click', () => {
+            if (game.playCard(0, index)) {
+                renderHands(numPlayers, game.playerCards, game.opponentCards, playerHand, game.centerCard);
+            } else {
+                alert('Invalid move! Card must match the suit or rank of the center card.');
+            }
+        });
+        playerHand.appendChild(cardElement);
     });
 
     // Render opponents' cards
