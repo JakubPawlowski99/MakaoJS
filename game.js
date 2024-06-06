@@ -1,39 +1,57 @@
 import { initializeDeck } from './deck.js';
 import { renderHands } from './ui.js';
 
-let playerCards = [];
-let opponentCards = [[], [], []]; // For up to three opponents
-let deckCards = initializeDeck(); // Initialize deckCards here
-let centerCard = {}; // Initialize centerCard
+export let deckCards = [];
+export let centerCard = {};
+export let currentPlayerIndex = 0;
+export let numPlayers = 0;
 
-export { playerCards, opponentCards, initializeDeck, renderHands, centerCard }; // Export centerCard
-
-export function dealCards(numPlayers, playerHand) {
-    // Clear previous hands
-    playerCards = [];
-    opponentCards = [[], [], []];
-
-    // Deal one card to the center area
-    centerCard = deckCards.pop();
-
-    // Deal initial cards to players
-    for (let i = 0; i < 5; i++) {
-        playerCards.push(deckCards.pop());
+class Player {
+    constructor(name) {
+        this.name = name;
+        this.hand = [];
     }
 
-    // Deal initial cards to opponents
-    for (let j = 0; j < numPlayers - 1; j++) {
-        for (let i = 0; i < 5; i++) {
-            opponentCards[j].push(deckCards.pop());
+    drawCards(numCards) {
+        for (let i = 0; i < numCards; i++) {
+            if (deckCards.length > 0) {
+                this.hand.push(deckCards.pop());
+            } else {
+                console.log("Deck is empty!");
+                break;
+            }
         }
     }
+}
 
-    console.log('Player cards:', playerCards);
-    console.log('Opponent cards:', opponentCards);
-    console.log('Center card:', centerCard); // Log centerCard
+export const players = [];
 
-    renderHands(numPlayers, playerCards, opponentCards, playerHand, centerCard); // Pass centerCard to renderHands
-    return playerCards; // Return playerCards here
+export function initializeGame(playersCount) {
+    numPlayers = playersCount;
+    deckCards = initializeDeck();
+    centerCard = deckCards.pop();
+    currentPlayerIndex = 0;
+
+    // Create players
+    players.length = 0;
+    for (let i = 0; i < numPlayers; i++) {
+        players.push(new Player(`Player ${i + 1}`));
+    }
+
+    // Deal cards
+    dealCards();
+    renderHands();
+}
+
+export function updateLog(message) {
+    const logElement = document.getElementById('game-log');
+    logElement.innerHTML += `<p>${message}</p>`;
+}
+
+export function dealCards() {
+    for (const player of players) {
+        player.drawCards(5);
+    }
 }
 
 export function drawCard() {
@@ -46,12 +64,22 @@ export function drawCard() {
 }
 
 export function playCard(playerIndex, cardIndex) {
-    const card = playerCards[cardIndex];
+    const card = players[playerIndex].hand[cardIndex];
     if (card.isValidMove(centerCard)) {
         centerCard = card;
-        playerCards.splice(cardIndex, 1);
-        card.playEffect({ /* game state here */ });
+        players[playerIndex].hand.splice(cardIndex, 1);
+        card.playEffect({
+            currentPlayerIndex,
+            numPlayers,
+            players,
+            updateLog,
+            skipTurn
+        });
         return true;
     }
     return false;
+}
+
+export function skipTurn() {
+    currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
 }
