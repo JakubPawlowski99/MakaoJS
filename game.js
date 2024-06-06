@@ -1,4 +1,3 @@
-// game.js
 import { initializeDeck } from './deck.js';
 import { renderHands } from './ui.js';
 
@@ -6,7 +5,8 @@ let playerCards = [];
 let opponentCards = [[], [], []]; // For up to three opponents
 let deckCards = initializeDeck(); // Initialize deckCards here
 
-export function dealCards(numPlayers, playerHand) { // Accept playerHand as a parameter
+export { playerCards, opponentCards, initializeDeck, renderHands }; // Export playerCards, opponentCards, initializeDeck, and renderHands
+export function dealCards(numPlayers, playerHand) {
     // Clear previous hands
     playerCards = [];
     opponentCards = [[], [], []];
@@ -26,4 +26,14 @@ export function dealCards(numPlayers, playerHand) { // Accept playerHand as a pa
     console.log('Player cards:', playerCards);
     console.log('Opponent cards:', opponentCards);
     renderHands(numPlayers, playerCards, opponentCards, playerHand); // Pass playerHand to renderHands
+    return playerCards; // Return playerCards here
+}
+
+export function drawCard() {
+    if (deckCards.length > 0) {
+        return deckCards.pop();
+    } else {
+        console.log("Deck is empty!");
+        return null;
+    }
 }
