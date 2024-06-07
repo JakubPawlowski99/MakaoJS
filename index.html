@@ -18,17 +18,21 @@
             <div id="discard-pile"></div>
             <div id="deck"></div>
             <button id="draw-card-btn">Draw Card</button>
+            <span id="penalty-display">Penalty:</span> <!-- Penalty Display -->
+            <span id="block-counter"></span>
+            <button id="end-turn-btn" disabled>End Turn</button>
         </div>
         <div id="player-hand" class="hand"></div>
     </div>
     <div id="player-selection" class="overlay">
         <form id="player-form">
-            <label for="num-players">Number of players (2-4):</label>
-            <input type="number" id="num-players" name="num-players" min="2" max="4" required>
+            <label for="num-players">Number of Players (2-4):</label>
+            <input type="number" id="num-players" name="num-players" min="2" max="4">
             <button type="submit">Start Game</button>
         </form>
     </div>
-    <div id="game-log" class="game-log"></div>
+    <div id="game-log" class="log"></div>
+
     <script type="module" src="script.js"></script>
 </body>
 </html>

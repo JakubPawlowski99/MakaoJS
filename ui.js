@@ -1,30 +1,43 @@
 import * as game from './game.js';
 
+
 export function renderHands() {
     // Render each player's cards
     for (let i = 0; i < game.numPlayers; i++) {
         const playerHandElement = document.getElementById(i === 0 ? 'player-hand' : `player-${i + 1}`);
         playerHandElement.innerHTML = '';
+        playerHandElement.classList.remove('current-player');
+
+        if (i === game.currentPlayerIndex) {
+            playerHandElement.classList.add('current-player');
+        }
+
         game.players[i].hand.forEach((card, index) => {
             const cardElement = createCardElement(card);
-            if (i === 0) {
-                cardElement.addEventListener('click', () => {
-                    if (game.playCard(0, index)) {
-                        renderHands();
-                    } else {
-                        alert('Invalid move! Card must match the suit or rank of the center card.');
-                    }
-                });
-            }
+            cardElement.addEventListener('click', () => {
+                if (game.playCard(i, index)) {
+                    renderHands();
+                } else if (i === 0) {
+                    alert('Invalid move! Card must match the suit or rank of the center card.');
+                }
+            });
             playerHandElement.appendChild(cardElement);
         });
     }
 
-    // Render center card
     const centerCardElement = document.getElementById('center-card');
     centerCardElement.innerHTML = '';
     if (game.centerCard) {
         centerCardElement.appendChild(createCardElement(game.centerCard));
+    }
+
+    updateCurrentPlayerDisplay();
+}
+
+function updateCurrentPlayerDisplay() {
+    for (let i = 0; i < game.numPlayers; i++) {
+        const playerHandElement = document.getElementById(i === 0 ? 'player-hand' : `player-${i + 1}`);
+        playerHandElement.classList.toggle('current-player', i === game.currentPlayerIndex);
     }
 }
 
