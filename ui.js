@@ -1,5 +1,6 @@
 import * as game from './game.js';
 
+
 export function renderHands() {
     // Render each player's cards
     for (let i = 0; i < game.numPlayers; i++) {
