@@ -5,7 +5,7 @@ export let deckCards = [];
 export let centerCard = {};
 export let currentPlayerIndex = 0;
 export let numPlayers = 0;
-let penaltyCounter = 0;
+export let penaltyCounter = 0;
 export let hasPlayedCardThisTurn = false;
 
 class Player {
@@ -28,6 +28,23 @@ class Player {
 
 export function increasePenaltyCounter(value) {
     penaltyCounter += value;
+    console.log(`Penalty counter increased: ${penaltyCounter}`);
+}
+
+export function resetPenaltyCounter() {
+    penaltyCounter = 0;
+    console.log(`Penalty counter reset to 0`);
+}
+
+export function decrementPenaltyCounter() {
+    if (penaltyCounter > 0) {
+        penaltyCounter--;
+        console.log(`Penalty counter decremented: ${penaltyCounter}`);
+    }
+}
+
+export function getPenaltyCounter() {
+    return penaltyCounter;
 }
 
 export const players = [];
@@ -60,7 +77,7 @@ export function updateLog(message) {
 
 export function dealCards() {
     for (const player of players) {
-        player.drawCards(5);
+        player.drawCards(10);
     }
 }
 
