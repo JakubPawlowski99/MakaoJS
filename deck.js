@@ -1,4 +1,4 @@
-import { Card, PlusTwoCard, PlusThreeCard} from './card.js';
+import { Card, PlusTwoCard, PlusThreeCard, BlockCard  } from './card.js';
 //include , BlockCard  in import later when implemented
 export function initializeDeck() {
     const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
@@ -10,8 +10,8 @@ export function initializeDeck() {
                 deck.push(new PlusTwoCard(suit, rank));
             }else if (rank === '3') {
                 deck.push(new PlusThreeCard(suit, rank));
-            // } else if (rank === '4') {
-            //     deck.push(new BlockCard(suit, rank));
+            } else if (rank === '4') {
+                deck.push(new BlockCard(suit, rank));
             } else {
                 deck.push(new Card(suit, rank));
             }

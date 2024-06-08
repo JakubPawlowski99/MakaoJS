@@ -7,6 +7,7 @@ export let currentPlayerIndex = 0;
 export let numPlayers = 0;
 export let penaltyCounter = 0;
 export let hasPlayedCardThisTurn = false;
+export let blockCounter = 0;
 
 class Player {
     constructor(name) {
@@ -68,6 +69,20 @@ export function initializeGame(playersCount) {
     document.getElementById('end-turn-btn').disabled = true;
 }
 
+export function increaseBlockCounter() {
+    blockCounter++;
+    console.log(`Block counter increased: ${blockCounter}`);
+}
+
+export function resetBlockCounter() {
+    blockCounter = 0;
+    console.log(`Block counter reset to 0`);
+}
+
+export function getBlockCounter() {
+    return blockCounter;
+}
+
 export function updateLog(message) {
     const logElement = document.getElementById('game-log');
     if (logElement) {
@@ -114,6 +129,7 @@ export function playCard(playerIndex, cardIndex) {
             skipTurn
         });
         updatePenaltyDisplay();
+        updateBlockDisplay();
 
         if (players[playerIndex].hand.length === 0) {
             updateLog(`${players[playerIndex].name} wins the game!`);
@@ -147,6 +163,13 @@ export function updatePenaltyDisplay() {
     const penaltyDisplay = document.getElementById('penalty-display');
     if (penaltyDisplay) {
         penaltyDisplay.textContent = `Penalty: ${penaltyCounter}`;
+    }
+}
+
+export function updateBlockDisplay() {
+    const blockDisplay = document.getElementById('block-display');
+    if (blockDisplay) {
+        blockDisplay.textContent = `Block: ${blockCounter}`;
     }
 }
 
