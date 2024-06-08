@@ -30,6 +30,6 @@ export class PlusThreeCard extends Card {
 export class BlockCard extends Card {
     playEffect(game) {
         game.updateLog(`${game.players[game.currentPlayerIndex].name} played a Block card.`);
-        increaseBlockCounter(1); // Increase the block counter by 1
+        increaseBlockCounter(); // Increase the block counter by 1
     }
 }

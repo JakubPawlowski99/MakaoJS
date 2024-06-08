@@ -1,5 +1,6 @@
 import { initializeDeck } from './deck.js';
 import { renderHands } from './ui.js';
+import { Player } from './player.js';
 
 export let deckCards = [];
 export let centerCard = {};
@@ -9,23 +10,6 @@ export let penaltyCounter = 0;
 export let hasPlayedCardThisTurn = false;
 export let blockCounter = 0;
 
-class Player {
-    constructor(name) {
-        this.name = name;
-        this.hand = [];
-    }
-
-    drawCards(numCards) {
-        for (let i = 0; i < numCards; i++) {
-            if (deckCards.length > 0) {
-                this.hand.push(deckCards.pop());
-            } else {
-                console.log("Deck is empty!");
-                break;
-            }
-        }
-    }
-}
 
 export function increasePenaltyCounter(value) {
     penaltyCounter += value;
@@ -118,6 +102,18 @@ export function playCard(playerIndex, cardIndex) {
 
     const card = players[playerIndex].hand[cardIndex];
     
+        // Check if the blockCounter is greater than 0 at the start of the turn
+        if (blockCounter > 0) {
+            // If the player attempts to play a card other than '4' while blockCounter is > 0, prevent it
+            if (card.rank !== '4') {
+                alert("You must play a '4' card because previous player played 4.");
+                return false;
+            } else {
+                // If the player plays a '4', increase the blockCounter and proceed with the turn
+                increaseBlockCounter();
+            }
+        }
+
     if (card.isValidMove(centerCard)) {
         centerCard = card;
         players[playerIndex].hand.splice(cardIndex, 1);
@@ -148,8 +144,23 @@ export function playCard(playerIndex, cardIndex) {
     }
     return false;
 }
-
 export function nextTurn() {
+    // Check if the blockCounter is greater than 0 at the start of the turn
+    if (blockCounter > 0) {
+        // Check if the current player played a '4' during their turn
+        if (!hasPlayedCardThisTurn) {
+            // Increase the playerBlockCounter by the value of the blockCounter
+            players[currentPlayerIndex].increasePlayerBlockCounter(blockCounter);
+            console.log(`Player ${players[currentPlayerIndex].name}'s Block Counter increased to ${players[currentPlayerIndex].getPlayerBlockCounter()}`);
+            // Reset the blockCounter to 0
+            resetBlockCounter();
+            updateBlockDisplay();
+            
+        }
+
+    }
+
+    // Move to the next player's turn
     currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
     hasPlayedCardThisTurn = false; // Reset the flag for the next player's turn
     renderHands();
