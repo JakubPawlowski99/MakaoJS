@@ -171,5 +171,8 @@ body {
     cursor: pointer;
 }
 .current-player {
-    background-color: yellow;
+    background-color: green;
+}
+.current-player.blocked {
+    background-color: red; 
 }
