@@ -1,3 +1,4 @@
+
 import { initializeDeck } from './deck.js';
 import { renderHands } from './ui.js';
 import { Player } from './player.js';
@@ -101,6 +102,13 @@ export function drawCardHandler() {
 
 export function endTurnHandler() {
     nextTurn(); // End the current player's turn
+    const currentPlayer = players[currentPlayerIndex];
+    console.log(`${currentPlayer.name}'s Block Counter: ${currentPlayer.getPlayerBlockCounter()}`);
+    // Decrease player's block counter by 1 if greater than 0
+    if (players[currentPlayerIndex].getPlayerBlockCounter() > 0) {
+        players[currentPlayerIndex].decrementPlayerBlockCounter();
+        updateBlockDisplay(); // Update block counter display
+    }
     // Disable the "End Turn" button and enable the "Draw Card" button
     updateButtonStates();
 }
@@ -129,7 +137,7 @@ export function updateLog(message) {
 
 export function dealCards() {
     for (const player of players) {
-        player.drawCards(10);
+        player.drawCards(20);
     }
 }
 
@@ -214,15 +222,17 @@ export function nextTurn() {
 export function updateButtonStates() {
     const drawCardBtn = document.getElementById('draw-card-btn');
     const endTurnBtn = document.getElementById('end-turn-btn');
+    const currentPlayer = players[currentPlayerIndex];
 
-    if (blockCounter > 0) {
+    if (currentPlayer.getPlayerBlockCounter() > 0 || getBlockCounter() > 0) {
+        // Player is blocked or there's a global block, disable draw card button and enable end turn button
+        drawCardBtn.disabled = true;
         endTurnBtn.disabled = false;
     } else {
         drawCardBtn.disabled = false;
         endTurnBtn.disabled = !hasPlayedCardThisTurn;
     }
 }
-
 export function skipTurn() {
     currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
     renderHands();
