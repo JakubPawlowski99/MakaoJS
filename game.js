@@ -34,6 +34,7 @@ export function getPenaltyCounter() {
 
 export const players = [];
 
+
 export function initializeGame(playersCount) {
     numPlayers = playersCount;
     deckCards = initializeDeck();
@@ -48,10 +49,62 @@ export function initializeGame(playersCount) {
     dealCards();
     renderHands();
 
-    // Enable the "Draw Card" button and disable the "End Turn" button at the start of the round
     document.getElementById('draw-card-btn').disabled = false;
     document.getElementById('end-turn-btn').disabled = true;
+
+    // Initial button state update
+    updateButtonStates();
 }
+
+export function drawCardHandler() {
+    if (getPenaltyCounter() > 0) {
+        console.log(`Starting penalty draw: penaltyCounter = ${getPenaltyCounter()}`);
+        
+        // Draw penalty cards and reset the penalty counter
+        while (getPenaltyCounter() > 0) {
+            const drawnCard = drawCard();
+            if (drawnCard) {
+                players[currentPlayerIndex].hand.push(drawnCard);
+                decrementPenaltyCounter(); // Decrease the penalty counter for each card drawn
+                // Logging the decrement action
+                console.log(`Decremented penaltyCounter: ${getPenaltyCounter()}`);
+            } else {
+                console.log("Deck is empty!");
+                break; // Stop drawing cards if the deck is empty
+            }
+        }
+        
+        // Ensuring penalty counter is reset to zero after drawing cards
+        resetPenaltyCounter();
+        console.log("Penalty draw complete, penaltyCounter reset to 0");
+        
+        updatePenaltyDisplay(); // Update penalty display
+        renderHands(); // Render hands
+
+        // Update button states
+        document.getElementById('end-turn-btn').disabled = false;
+        document.getElementById('draw-card-btn').disabled = true;
+    } else {
+        // Normal draw card logic
+        const drawnCard = drawCard();
+        if (drawnCard) {
+            players[currentPlayerIndex].hand.push(drawnCard);
+            updateLog(`${players[currentPlayerIndex].name} drew a card.`);
+            renderHands();
+            
+            // Update button states
+            document.getElementById('end-turn-btn').disabled = false;
+            document.getElementById('draw-card-btn').disabled = true;
+        }
+    }
+}
+
+export function endTurnHandler() {
+    nextTurn(); // End the current player's turn
+    // Disable the "End Turn" button and enable the "Draw Card" button
+    updateButtonStates();
+}
+
 
 export function increaseBlockCounter() {
     blockCounter++;
@@ -88,7 +141,6 @@ export function drawCard() {
         return null;
     }
 }
-
 export function playCard(playerIndex, cardIndex) {
     if (playerIndex !== currentPlayerIndex) {
         alert("It's not your turn!");
@@ -102,17 +154,15 @@ export function playCard(playerIndex, cardIndex) {
 
     const card = players[playerIndex].hand[cardIndex];
     
-        // Check if the blockCounter is greater than 0 at the start of the turn
-        if (blockCounter > 0) {
-            // If the player attempts to play a card other than '4' while blockCounter is > 0, prevent it
-            if (card.rank !== '4') {
-                alert("You must play a '4' card because previous player played 4.");
-                return false;
-            } else {
-                // If the player plays a '4', increase the blockCounter and proceed with the turn
-                hasPlayedCardThisTurn = true;
-            }
+    if (blockCounter > 0) {
+        // If the player attempts to play a card other than '4' while blockCounter is > 0, prevent it
+        if (card.rank !== '4') {
+            alert("You must play a '4' card because the previous player played a '4'.");
+            return false;
+        } else {
+            hasPlayedCardThisTurn = true;
         }
+    }
 
     if (card.isValidMove(centerCard)) {
         centerCard = card;
@@ -131,13 +181,10 @@ export function playCard(playerIndex, cardIndex) {
             updateLog(`${players[playerIndex].name} wins the game!`);
             endGame();
         }
-        
-        // Set the flag to true indicating that a card has been played
+
         hasPlayedCardThisTurn = true;
         
-        //disable draw button after playing card
         document.getElementById('draw-card-btn').disabled = true;
-        // Enable the "End Turn" button after playing a card
         document.getElementById('end-turn-btn').disabled = false;
         
         return true;
@@ -145,25 +192,35 @@ export function playCard(playerIndex, cardIndex) {
     return false;
 }
 export function nextTurn() {
-    // Check if the blockCounter is greater than 0 at the start of the turn
     if (blockCounter > 0) {
         // Check if the current player played a '4' during their turn
         if (!hasPlayedCardThisTurn) {
             // Increase the playerBlockCounter by the value of the blockCounter
             players[currentPlayerIndex].increasePlayerBlockCounter(blockCounter);
             console.log(`Player ${players[currentPlayerIndex].name}'s Block Counter increased to ${players[currentPlayerIndex].getPlayerBlockCounter()}`);
-            // Reset the blockCounter to 0
+            // Reset and update the blockCounter
             resetBlockCounter();
             updateBlockDisplay();
-            
         }
-
     }
 
     // Move to the next player's turn
     currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
     hasPlayedCardThisTurn = false; // Reset the flag for the next player's turn
     renderHands();
+    updateButtonStates(); // Update button states at the start of the turn
+}
+
+export function updateButtonStates() {
+    const drawCardBtn = document.getElementById('draw-card-btn');
+    const endTurnBtn = document.getElementById('end-turn-btn');
+
+    if (blockCounter > 0) {
+        endTurnBtn.disabled = false;
+    } else {
+        drawCardBtn.disabled = false;
+        endTurnBtn.disabled = !hasPlayedCardThisTurn;
+    }
 }
 
 export function skipTurn() {
@@ -183,6 +240,7 @@ export function updateBlockDisplay() {
         blockDisplay.textContent = `Block: ${blockCounter}`;
     }
 }
+
 
 function endGame() {
     alert("Game Over");
