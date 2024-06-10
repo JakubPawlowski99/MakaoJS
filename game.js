@@ -110,7 +110,7 @@ export function playCard(playerIndex, cardIndex) {
                 return false;
             } else {
                 // If the player plays a '4', increase the blockCounter and proceed with the turn
-                increaseBlockCounter();
+                hasPlayedCardThisTurn = true;
             }
         }
 
