@@ -24,4 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('end-turn-btn').addEventListener('click', () => {
         game.endTurnHandler();
     });
+    document.getElementById('reshuffle-btn').addEventListener('click', () => {
+        game.reshuffleHandler(); 
+    });
+    const deckElement = document.getElementById('deck');
+    deckElement.addEventListener('mouseover', () => {
+        const numCards = game.deckCards.length;
+        deckElement.title = `Number of Cards in Deck: ${numCards}`;
+    });
 });

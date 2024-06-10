@@ -1,5 +1,5 @@
 import { Card, PlusTwoCard, PlusThreeCard, BlockCard  } from './card.js';
-//include , BlockCard  in import later when implemented
+
 export function initializeDeck() {
     const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
     const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
@@ -8,7 +8,7 @@ export function initializeDeck() {
         for (let rank of ranks) {
             if (rank === '2') {
                 deck.push(new PlusTwoCard(suit, rank));
-            }else if (rank === '3') {
+            } else if (rank === '3') {
                 deck.push(new PlusThreeCard(suit, rank));
             } else if (rank === '4') {
                 deck.push(new BlockCard(suit, rank));
@@ -25,5 +25,6 @@ export function shuffle(array) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
+    console.log('Deck shuffled');
     return array;
 }

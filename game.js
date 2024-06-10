@@ -1,10 +1,11 @@
 
-import { initializeDeck } from './deck.js';
+import { initializeDeck, shuffle } from './deck.js';
 import { renderHands } from './ui.js';
 import { Player } from './player.js';
 
 export let deckCards = [];
 export let centerCard = {};
+export let playedCards = [];
 export let currentPlayerIndex = 0;
 export let numPlayers = 0;
 export let penaltyCounter = 0;
@@ -40,6 +41,7 @@ export function initializeGame(playersCount) {
     numPlayers = playersCount;
     deckCards = initializeDeck();
     centerCard = deckCards.pop();
+    playedCards.push(centerCard); 
     currentPlayerIndex = 0;
 
     players.length = 0;
@@ -137,7 +139,7 @@ export function updateLog(message) {
 
 export function dealCards() {
     for (const player of players) {
-        player.drawCards(20);
+        player.drawCards(5);
     }
 }
 
@@ -174,6 +176,7 @@ export function playCard(playerIndex, cardIndex) {
 
     if (card.isValidMove(centerCard)) {
         centerCard = card;
+        playedCards.push(card); 
         players[playerIndex].hand.splice(cardIndex, 1);
         card.playEffect({
             currentPlayerIndex,
@@ -228,9 +231,11 @@ export function updateButtonStates() {
         // Player is blocked or there's a global block, disable draw card button and enable end turn button
         drawCardBtn.disabled = true;
         endTurnBtn.disabled = false;
+        document.getElementById('player-hand').classList.add('blocked');
     } else {
         drawCardBtn.disabled = false;
         endTurnBtn.disabled = !hasPlayedCardThisTurn;
+        document.getElementById('player-hand').classList.remove('blocked');
     }
 }
 export function skipTurn() {
@@ -251,7 +256,25 @@ export function updateBlockDisplay() {
     }
 }
 
-
+export function reshuffleHandler() {
+    // Join played cards excluding the last one to the deck
+    if (playedCards.length > 1) { // Check if there are played cards to reshuffle
+        // Exclude the last played card
+        const cardsToReshuffle = playedCards.slice(0, playedCards.length - 1);
+        // Concatenate the played cards to the deck
+        deckCards = deckCards.concat(cardsToReshuffle);
+        // Shuffle the deck
+        shuffle(deckCards);
+        // Clear the played cards array
+        playedCards = [];
+        // Log the reshuffle event
+        console.log("Deck reshuffled.");
+        // Render hands after reshuffling
+        renderHands();
+    } else {
+        console.log("There are not enough played cards to reshuffle.");
+    }
+}
 function endGame() {
     alert("Game Over");
 }
