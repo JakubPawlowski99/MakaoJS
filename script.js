@@ -1,5 +1,4 @@
 import * as game from './game.js';
-import { renderHands } from './ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const playerForm = document.getElementById('player-form');
@@ -24,9 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('end-turn-btn').addEventListener('click', () => {
         game.endTurnHandler();
     });
+
     document.getElementById('reshuffle-btn').addEventListener('click', () => {
-        game.reshuffleHandler(); 
+        game.reshuffleHandler();
     });
+
     const deckElement = document.getElementById('deck');
     deckElement.addEventListener('mouseover', () => {
         const numCards = game.deckCards.length;
