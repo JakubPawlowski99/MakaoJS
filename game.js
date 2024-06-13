@@ -1,4 +1,3 @@
-
 import { initializeDeck, shuffle } from './deck.js';
 import { renderHands } from './ui.js';
 import { Player } from './player.js';
@@ -11,32 +10,13 @@ export let numPlayers = 0;
 export let penaltyCounter = 0;
 export let hasPlayedCardThisTurn = false;
 export let blockCounter = 0;
-
-
-export function increasePenaltyCounter(value) {
-    penaltyCounter += value;
-    console.log(`Penalty counter increased: ${penaltyCounter}`);
-}
-
-export function resetPenaltyCounter() {
-    penaltyCounter = 0;
-    console.log(`Penalty counter reset to 0`);
-}
-
-export function decrementPenaltyCounter() {
-    if (penaltyCounter > 0) {
-        penaltyCounter--;
-        console.log(`Penalty counter decremented: ${penaltyCounter}`);
-    }
-}
-
-export function getPenaltyCounter() {
-    return penaltyCounter;
-}
+export let demandedCard = '-';
+export let initialJackPlayerIndex = -1;
+export let demandMetByInitialPlayer = false; 
 
 export const players = [];
 
-
+// Functions to export
 export function initializeGame(playersCount) {
     numPlayers = playersCount;
     deckCards = initializeDeck();
@@ -115,7 +95,6 @@ export function endTurnHandler() {
     updateButtonStates();
 }
 
-
 export function increaseBlockCounter() {
     blockCounter++;
     console.log(`Block counter increased: ${blockCounter}`);
@@ -130,6 +109,69 @@ export function getBlockCounter() {
     return blockCounter;
 }
 
+export function showCardSelectionModal() {
+    const modal = document.getElementById('card-selection-modal');
+    const options = document.getElementById('card-selection-options');
+    options.innerHTML = '';
+
+    const validRanks = ['5', '6', '7', '8', '9', '10'];
+    for (let rank of validRanks) {
+        const cardElement = document.createElement('div');
+        cardElement.classList.add('card');
+        cardElement.textContent = rank; // Show only the rank, without suit
+        cardElement.addEventListener('click', () => selectCard(rank));
+        options.appendChild(cardElement);
+    }
+
+    modal.style.display = 'flex';
+}
+
+export function selectCard(rank) {
+    demandedCard = rank;
+    document.getElementById('demand-display').textContent = `Demand: ${rank}`;
+    document.getElementById('card-selection-modal').style.display = 'none';
+}
+
+export function resetDemand() {
+    demandedCard = '-';
+    document.getElementById('demand-display').textContent = 'Demand: -';
+}
+
+export function enforceDemand(card) {
+    if (demandedCard !== '-') {
+        // During demand, allow any card of demanded rank to be played
+        if (!(centerCard.rank === 'J' && card.rank === demandedCard) && card.rank !== demandedCard) {
+            // Check if the center card is a Jack and the card matches the demanded rank
+            if (!(centerCard.rank === 'J' && card.rank === demandedCard)) {
+                alert(`You must play a '${demandedCard}' card or draw a card.`);
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+export function increasePenaltyCounter(value) {
+    penaltyCounter += value;
+    console.log(`Penalty counter increased: ${penaltyCounter}`);
+}
+
+export function resetPenaltyCounter() {
+    penaltyCounter = 0;
+    console.log(`Penalty counter reset to 0`);
+}
+
+export function decrementPenaltyCounter() {
+    if (penaltyCounter > 0) {
+        penaltyCounter--;
+        console.log(`Penalty counter decremented: ${penaltyCounter}`);
+    }
+}
+
+export function getPenaltyCounter() {
+    return penaltyCounter;
+}
+
 export function updateLog(message) {
     const logElement = document.getElementById('game-log');
     if (logElement) {
@@ -139,7 +181,7 @@ export function updateLog(message) {
 
 export function dealCards() {
     for (const player of players) {
-        player.drawCards(5);
+        player.drawCards(15);
     }
 }
 
@@ -163,9 +205,8 @@ export function playCard(playerIndex, cardIndex) {
     }
 
     const card = players[playerIndex].hand[cardIndex];
-    
+
     if (blockCounter > 0) {
-        // If the player attempts to play a card other than '4' while blockCounter is > 0, prevent it
         if (card.rank !== '4') {
             alert("You must play a '4' card because the previous player played a '4'.");
             return false;
@@ -174,10 +215,28 @@ export function playCard(playerIndex, cardIndex) {
         }
     }
 
-    if (card.isValidMove(centerCard)) {
+    // Check enforcement of demand
+    if (!enforceDemand(card)) {
+        return false;
+    }
+
+    // Check if the move is valid based on the current center card and demanded card
+    if (card.isValidMove(centerCard, demandedCard)) {
         centerCard = card;
-        playedCards.push(card); 
+        playedCards.push(card);
         players[playerIndex].hand.splice(cardIndex, 1);
+        
+        // If the played card is a Jack, set initialJackPlayerIndex
+        if (card.rank === 'J') {
+            initialJackPlayerIndex = playerIndex;
+            demandMetByInitialPlayer = false; // Reset demand met flag
+        }
+        
+        // Track if the demand is met by the initial player
+        if (demandedCard !== '-' && card.rank === demandedCard && playerIndex === initialJackPlayerIndex) {
+            demandMetByInitialPlayer = true;
+        }
+        
         card.playEffect({
             currentPlayerIndex,
             numPlayers,
@@ -185,6 +244,7 @@ export function playCard(playerIndex, cardIndex) {
             updateLog,
             skipTurn
         });
+
         updatePenaltyDisplay();
         updateBlockDisplay();
 
@@ -194,33 +254,41 @@ export function playCard(playerIndex, cardIndex) {
         }
 
         hasPlayedCardThisTurn = true;
-        
+
         document.getElementById('draw-card-btn').disabled = true;
         document.getElementById('end-turn-btn').disabled = false;
-        
+
         return true;
+    } else {
+        alert(`You cannot play this card.`);
+        return false;
     }
-    return false;
 }
+
+
 export function nextTurn() {
     if (blockCounter > 0) {
-        // Check if the current player played a '4' during their turn
         if (!hasPlayedCardThisTurn) {
-            // Increase the playerBlockCounter by the value of the blockCounter
             players[currentPlayerIndex].increasePlayerBlockCounter(blockCounter);
-            console.log(`Player ${players[currentPlayerIndex].name}'s Block Counter increased to ${players[currentPlayerIndex].getPlayerBlockCounter()}`);
-            // Reset and update the blockCounter
             resetBlockCounter();
             updateBlockDisplay();
         }
     }
 
-    // Move to the next player's turn
     currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
-    hasPlayedCardThisTurn = false; // Reset the flag for the next player's turn
+
+    // Reset demand after the initial player has met the demand
+    if (initialJackPlayerIndex !== -1 && currentPlayerIndex === initialJackPlayerIndex && demandMetByInitialPlayer) {
+        resetDemand();
+        initialJackPlayerIndex = -1; // Reset initialJackPlayerIndex
+        demandMetByInitialPlayer = false; // Reset demand met flag
+    }
+
+    hasPlayedCardThisTurn = false;
     renderHands();
-    updateButtonStates(); // Update button states at the start of the turn
+    updateButtonStates();
 }
+
 
 export function updateButtonStates() {
     const drawCardBtn = document.getElementById('draw-card-btn');
@@ -263,11 +331,9 @@ export function reshuffleHandler() {
         const cardsToReshuffle = playedCards.slice(0, playedCards.length - 1);
         // Concatenate the played cards to the deck
         deckCards = deckCards.concat(cardsToReshuffle);
-        // Shuffle the deck
         shuffle(deckCards);
         // Clear the played cards array
         playedCards = [];
-        // Log the reshuffle event
         console.log("Deck reshuffled.");
         // Render hands after reshuffling
         renderHands();
@@ -275,6 +341,7 @@ export function reshuffleHandler() {
         console.log("There are not enough played cards to reshuffle.");
     }
 }
+
 function endGame() {
     alert("Game Over");
 }

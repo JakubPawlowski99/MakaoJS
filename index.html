@@ -18,8 +18,9 @@
             <div id="deck"></div>
             <button id="reshuffle-btn">Reshuffle</button>
             <button id="draw-card-btn">Draw Card</button>
-            <span id="penalty-display">Penalty:</span>
+            <span id="penalty-display">Penalty: 0</span>
             <div id="block-display">Block: 0</div>
+            <span id="demand-display">Demand: -</span>
             <button id="end-turn-btn" disabled>End Turn</button>
         </div>
         <div id="player-hand" class="hand"></div>
@@ -33,6 +34,12 @@
     </div>
     <div id="game-log" class="log"></div>
 
+    <div id="card-selection-modal" class="overlay" style="display: none;">
+        <div class="modal-content">
+            <p>Select a card number (5 to 10):</p>
+            <div id="card-selection-options"></div>
+        </div>
+    </div>
     <script type="module" src="script.js"></script>
 </body>
 </html>
