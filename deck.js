@@ -1,4 +1,5 @@
-import { Card, PlusTwoCard, PlusThreeCard, BlockCard, JackCard } from './card.js';
+// deck.js
+import { Card, PlusTwoCard, PlusThreeCard, BlockCard, JackCard, AceCard } from './card.js';
 
 export function initializeDeck() {
     const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
@@ -14,7 +15,9 @@ export function initializeDeck() {
                 deck.push(new BlockCard(suit, rank));
             } else if (rank === 'J') {
                 deck.push(new JackCard(suit, rank));
-            } else  {
+            } else if (rank === 'A') {
+                deck.push(new AceCard(suit, rank));
+            } else {
                 deck.push(new Card(suit, rank));
             }
         }
