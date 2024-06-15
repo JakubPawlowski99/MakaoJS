@@ -11,8 +11,9 @@ export let penaltyCounter = 0;
 export let hasPlayedCardThisTurn = false;
 export let blockCounter = 0;
 export let demandedCard = '-';
+export let demandedSuit = null;
 export let initialJackPlayerIndex = -1;
-export let demandMetByInitialPlayer = false; 
+export let demandMetByInitialPlayer = false;
 
 export const players = [];
 
@@ -21,7 +22,7 @@ export function initializeGame(playersCount) {
     numPlayers = playersCount;
     deckCards = initializeDeck();
     centerCard = deckCards.pop();
-    playedCards.push(centerCard); 
+    playedCards.push(centerCard);
     currentPlayerIndex = 0;
 
     players.length = 0;
@@ -95,6 +96,31 @@ export function endTurnHandler() {
     updateButtonStates();
 }
 
+export function showSuitSelectionModal() {
+    const modal = document.getElementById('suit-selection-modal');
+    modal.style.display = 'flex';
+}
+
+export function selectSuit(suit) {
+    demandedSuit = suit;
+    document.getElementById('suit-selection-modal').style.display = 'none';
+    document.getElementById('demand-display').textContent = `Demand: ${suit}`;
+}
+export function enforceDemand(card) {
+    if (demandedSuit && card.suit !== demandedSuit) {
+        alert(`You must play a card of the demanded suit: ${demandedSuit}.`);
+        return false;
+    }
+
+    if (demandedCard !== '-') {
+        if (!(centerCard.rank === 'J' && card.rank === demandedCard) && card.rank !== demandedCard) {
+            alert(`You must play a '${demandedCard}' card or draw a card.`);
+            return false;
+        }
+    }
+    return true;
+}
+
 export function increaseBlockCounter() {
     blockCounter++;
     console.log(`Block counter increased: ${blockCounter}`);
@@ -135,20 +161,6 @@ export function selectCard(rank) {
 export function resetDemand() {
     demandedCard = '-';
     document.getElementById('demand-display').textContent = 'Demand: -';
-}
-
-export function enforceDemand(card) {
-    if (demandedCard !== '-') {
-        // During demand, allow any card of demanded rank to be played
-        if (!(centerCard.rank === 'J' && card.rank === demandedCard) && card.rank !== demandedCard) {
-            // Check if the center card is a Jack and the card matches the demanded rank
-            if (!(centerCard.rank === 'J' && card.rank === demandedCard)) {
-                alert(`You must play a '${demandedCard}' card or draw a card.`);
-                return false;
-            }
-        }
-    }
-    return true;
 }
 
 export function increasePenaltyCounter(value) {
@@ -193,6 +205,7 @@ export function drawCard() {
         return null;
     }
 }
+
 export function playCard(playerIndex, cardIndex) {
     if (playerIndex !== currentPlayerIndex) {
         alert("It's not your turn!");
@@ -220,51 +233,61 @@ export function playCard(playerIndex, cardIndex) {
         return false;
     }
 
-    // Check if the move is valid based on the current center card and demanded card
-    if (card.isValidMove(centerCard, demandedCard)) {
+    // Check if the move is valid based on the current center card and demanded card/suit
+    if (card.isValidMove(centerCard, demandedCard, demandedSuit)) {
         centerCard = card;
         playedCards.push(card);
         players[playerIndex].hand.splice(cardIndex, 1);
-        
+
         // If the played card is a Jack, set initialJackPlayerIndex
         if (card.rank === 'J') {
             initialJackPlayerIndex = playerIndex;
             demandMetByInitialPlayer = false; // Reset demand met flag
         }
-        
-        // Track if the demand is met by the initial player
-        if (demandedCard !== '-' && card.rank === demandedCard && playerIndex === initialJackPlayerIndex) {
-            demandMetByInitialPlayer = true;
+
+        // If the played card is an Ace, show suit selection modal
+        if (card.rank === 'A') {
+            card.playEffect({
+                currentPlayerIndex,
+                numPlayers,
+                players,
+                updateLog,
+                skipTurn
+            });
+        } else {
+            // Track if the demand is met by the initial player
+            if (demandedCard !== '-' && card.rank === demandedCard && playerIndex === initialJackPlayerIndex) {
+                demandMetByInitialPlayer = true;
+            }
+            
+            card.playEffect({
+                currentPlayerIndex,
+                numPlayers,
+                players,
+                updateLog,
+                skipTurn
+            });
+
+            updatePenaltyDisplay();
+            updateBlockDisplay();
+
+            if (players[playerIndex].hand.length === 0) {
+                updateLog(`${players[playerIndex].name} wins the game!`);
+                endGame();
+            }
+
+            hasPlayedCardThisTurn = true;
+
+            document.getElementById('draw-card-btn').disabled = true;
+            document.getElementById('end-turn-btn').disabled = false;
+
+            return true;
         }
-        
-        card.playEffect({
-            currentPlayerIndex,
-            numPlayers,
-            players,
-            updateLog,
-            skipTurn
-        });
-
-        updatePenaltyDisplay();
-        updateBlockDisplay();
-
-        if (players[playerIndex].hand.length === 0) {
-            updateLog(`${players[playerIndex].name} wins the game!`);
-            endGame();
-        }
-
-        hasPlayedCardThisTurn = true;
-
-        document.getElementById('draw-card-btn').disabled = true;
-        document.getElementById('end-turn-btn').disabled = false;
-
-        return true;
     } else {
         alert(`You cannot play this card.`);
         return false;
     }
 }
-
 
 export function nextTurn() {
     if (blockCounter > 0) {
@@ -289,7 +312,6 @@ export function nextTurn() {
     updateButtonStates();
 }
 
-
 export function updateButtonStates() {
     const drawCardBtn = document.getElementById('draw-card-btn');
     const endTurnBtn = document.getElementById('end-turn-btn');
@@ -306,10 +328,12 @@ export function updateButtonStates() {
         document.getElementById('player-hand').classList.remove('blocked');
     }
 }
+
 export function skipTurn() {
     currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
     renderHands();
 }
+
 export function updatePenaltyDisplay() {
     const penaltyDisplay = document.getElementById('penalty-display');
     if (penaltyDisplay) {
@@ -345,3 +369,6 @@ export function reshuffleHandler() {
 function endGame() {
     alert("Game Over");
 }
+
+// Expose selectSuit function to the global scope
+window.selectSuit = selectSuit;

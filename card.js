@@ -1,18 +1,18 @@
-import { increasePenaltyCounter, increaseBlockCounter, showCardSelectionModal} from './game.js';
+// card.js
+import { increasePenaltyCounter, increaseBlockCounter, showCardSelectionModal, showSuitSelectionModal } from './game.js';
+
 export class Card {
     constructor(suit, rank) {
         this.suit = suit;
         this.rank = rank;
     }
 
-    isValidMove(centerCard, demandedCard) {
-        if (demandedCard !== '-' && this.rank !== demandedCard) {
+    isValidMove(centerCard, demandedCard, demandedSuit) {
+        if (demandedSuit && this.suit !== demandedSuit) {
             return false;
         }
-        
-        // Check for special cases like Jack
-        if (centerCard.rank === 'J') {
-            return this.rank === demandedCard || this.rank === 'J';
+        if (demandedCard !== '-' && this.rank !== demandedCard) {
+            return false;
         }
         
         return this.suit === centerCard.suit || this.rank === centerCard.rank;
@@ -22,6 +22,7 @@ export class Card {
         // Default effect: nothing special
     }
 }
+
 export class PlusTwoCard extends Card {
     playEffect(game) {
         game.updateLog(`${game.players[game.currentPlayerIndex].name} played a Plus Two card.`);
@@ -42,6 +43,7 @@ export class BlockCard extends Card {
         increaseBlockCounter(); // Increase the block counter by 1
     }
 }
+
 export class JackCard extends Card {
     playEffect(game) {
         game.updateLog(`${game.players[game.currentPlayerIndex].name} played a Jack card.`);
@@ -51,5 +53,12 @@ export class JackCard extends Card {
     isValidMove(centerCard, demandedCard) {
         // During demand, a Jack card can always be played
         return true;
+    }
+}
+
+export class AceCard extends Card {
+    playEffect(game) {
+        game.updateLog(`${game.players[game.currentPlayerIndex].name} played an Ace card.`);
+        showSuitSelectionModal();
     }
 }

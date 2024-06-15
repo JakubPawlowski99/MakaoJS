@@ -40,6 +40,17 @@
             <div id="card-selection-options"></div>
         </div>
     </div>
+    <div id="suit-selection-modal" class="overlay" style="display: none;">
+        <div class="modal-content">
+            <p>Select a suit:</p>
+            <div id="suit-selection-options">
+                <button onclick="selectSuit('hearts')">Hearts</button>
+                <button onclick="selectSuit('diamonds')">Diamonds</button>
+                <button onclick="selectSuit('clubs')">Clubs</button>
+                <button onclick="selectSuit('spades')">Spades</button>
+            </div>
+        </div>
+    </div>
     <script type="module" src="script.js"></script>
 </body>
 </html>
