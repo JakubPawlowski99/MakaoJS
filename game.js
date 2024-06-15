@@ -16,6 +16,7 @@ export let demandedSuit = null;
 export let initialJackPlayerIndex = -1;
 export let demandMetByInitialPlayer = false;
 
+
 export const players = [];
 
 // Functions to export
@@ -102,14 +103,18 @@ export function showSuitSelectionModal() {
     modal.style.display = 'flex';
 }
 
+
 export function selectSuit(suit) {
     demandedSuit = suit;
     document.getElementById('suit-selection-modal').style.display = 'none';
     document.getElementById('demand-display').textContent = `Demand: ${suit}`;
+
+    // Enable the "End Turn" button after selecting a suit
+    document.getElementById('end-turn-btn').disabled = false;
+    document.getElementById('draw-card-btn').disabled = true; // Disable the "Draw Card" button
 }
+
 export function enforceDemand(card) {
-    console.log(`enforceDemand called with card: ${JSON.stringify(card)}, demandedSuit: ${demandedSuit}`);
-    
     if (demandedSuit && card.suit !== demandedSuit) {
         alert(`You must play a card of the demanded suit: ${demandedSuit}.`);
         return false;
@@ -121,6 +126,7 @@ export function enforceDemand(card) {
             return false;
         }
     }
+
     return true;
 }
 
@@ -239,7 +245,6 @@ export function playCard(playerIndex, cardIndex) {
     // Check if the move is valid based on the current center card and demanded card/suit
     if (card.isValidMove(centerCard, demandedCard, demandedSuit)) {
         centerCard = card; // Update center card
-        playedCards.push(card);
         players[playerIndex].hand.splice(cardIndex, 1); // Remove the played card from the player's hand
         renderHands(); // Render hands after playing a card
 
@@ -255,14 +260,14 @@ export function playCard(playerIndex, cardIndex) {
             showCardSelectionModal();
         } else if (card.rank === 'A') {
             showSuitSelectionModal();
-            document.getElementById('end-turn-btn').disabled = false; // Enable the "End Turn" button
-            document.getElementById('draw-card-btn').disabled = true; // Disable the "Draw Card" button
-            return true; // Allow the player to end their turn
+            resetDemand(); // Reset the demand after playing an Ace
+            hasPlayedCardThisTurn = true; // Set hasPlayedCardThisTurn to true after playing Ace and selecting suit
+            return true; // Allow the player to end their turn after selecting suit
         } else if (card.rank === '4') {
             increaseBlockCounter();
         }
 
-        hasPlayedCardThisTurn = true;
+        hasPlayedCardThisTurn = true; // Set hasPlayedCardThisTurn to true after playing a valid card
 
         // End the game if the current player has no more cards
         if (players[currentPlayerIndex].hand.length === 0) {
@@ -270,8 +275,7 @@ export function playCard(playerIndex, cardIndex) {
         }
 
         // Update button states
-        document.getElementById('end-turn-btn').disabled = false;
-        document.getElementById('draw-card-btn').disabled = true;
+        updateButtonStates();
 
         // After a player successfully plays a card, check if the initial player met the demand
         if (demandMetByInitialPlayer && currentPlayerIndex === initialJackPlayerIndex) {
@@ -285,7 +289,6 @@ export function playCard(playerIndex, cardIndex) {
         return false;
     }
 }
-
 export function nextTurn() {
     if (blockCounter > 0) {
         if (!hasPlayedCardThisTurn) {

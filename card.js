@@ -8,14 +8,22 @@ export class Card {
     }
 
     isValidMove(centerCard, demandedCard, demandedSuit) {
-        if (demandedSuit && this.suit !== demandedSuit) {
-            return false;
+        // Handle Ace card special case
+        if (this.rank === 'A') {
+            // Check if the card's suit matches the demanded suit (if any)
+            if (demandedSuit && this.suit !== demandedSuit) {
+                return false;
+            }
+        } else {
+            // For other cards, check if the rank or suit matches the center card or demanded card/suit
+            if (centerCard && this.rank !== centerCard.rank && this.suit !== centerCard.suit) {
+                if (!(centerCard.rank === 'J' && this.rank === demandedCard) && this.rank !== demandedCard && this.suit !== demandedSuit) {
+                    return false;
+                }
+            }
         }
-        if (demandedCard !== '-' && this.rank !== demandedCard) {
-            return false;
-        }
-        
-        return this.suit === centerCard.suit || this.rank === centerCard.rank;
+
+        return true;
     }
 
     playEffect(game) {
@@ -59,6 +67,11 @@ export class JackCard extends Card {
 export class AceCard extends Card {
     playEffect(game) {
         game.updateLog(`${game.players[game.currentPlayerIndex].name} played an Ace card.`);
-        showSuitSelectionModal();
+        game.showSuitSelectionModal();
+    }
+
+    isValidMove(centerCard, demandedCard, demandedSuit) {
+        // Allow any card of the demanded suit or another Ace (`A`) card to be played
+        return this.suit === demandedSuit || this.rank === 'A';
     }
 }
