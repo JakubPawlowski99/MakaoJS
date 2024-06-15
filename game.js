@@ -1,3 +1,4 @@
+// game.js
 import { initializeDeck, shuffle } from './deck.js';
 import { renderHands } from './ui.js';
 import { Player } from './player.js';
@@ -107,6 +108,8 @@ export function selectSuit(suit) {
     document.getElementById('demand-display').textContent = `Demand: ${suit}`;
 }
 export function enforceDemand(card) {
+    console.log(`enforceDemand called with card: ${JSON.stringify(card)}, demandedSuit: ${demandedSuit}`);
+    
     if (demandedSuit && card.suit !== demandedSuit) {
         alert(`You must play a card of the demanded suit: ${demandedSuit}.`);
         return false;
@@ -235,56 +238,50 @@ export function playCard(playerIndex, cardIndex) {
 
     // Check if the move is valid based on the current center card and demanded card/suit
     if (card.isValidMove(centerCard, demandedCard, demandedSuit)) {
-        centerCard = card;
+        centerCard = card; // Update center card
         playedCards.push(card);
-        players[playerIndex].hand.splice(cardIndex, 1);
+        players[playerIndex].hand.splice(cardIndex, 1); // Remove the played card from the player's hand
+        renderHands(); // Render hands after playing a card
 
-        // If the played card is a Jack, set initialJackPlayerIndex
-        if (card.rank === 'J') {
+        // Handle special cards and demands
+        if (card.rank === '2') {
+            increasePenaltyCounter(2);
+            updatePenaltyDisplay(); // Update penalty display
+        } else if (card.rank === '3') {
+            increasePenaltyCounter(3);
+            updatePenaltyDisplay(); // Update penalty display
+        } else if (card.rank === 'J') {
             initialJackPlayerIndex = playerIndex;
+            showCardSelectionModal();
+        } else if (card.rank === 'A') {
+            showSuitSelectionModal();
+            document.getElementById('end-turn-btn').disabled = false; // Enable the "End Turn" button
+            document.getElementById('draw-card-btn').disabled = true; // Disable the "Draw Card" button
+            return true; // Allow the player to end their turn
+        } else if (card.rank === '4') {
+            increaseBlockCounter();
+        }
+
+        hasPlayedCardThisTurn = true;
+
+        // End the game if the current player has no more cards
+        if (players[currentPlayerIndex].hand.length === 0) {
+            endGame();
+        }
+
+        // Update button states
+        document.getElementById('end-turn-btn').disabled = false;
+        document.getElementById('draw-card-btn').disabled = true;
+
+        // After a player successfully plays a card, check if the initial player met the demand
+        if (demandMetByInitialPlayer && currentPlayerIndex === initialJackPlayerIndex) {
+            resetDemand();
             demandMetByInitialPlayer = false; // Reset demand met flag
         }
 
-        // If the played card is an Ace, show suit selection modal
-        if (card.rank === 'A') {
-            card.playEffect({
-                currentPlayerIndex,
-                numPlayers,
-                players,
-                updateLog,
-                skipTurn
-            });
-        } else {
-            // Track if the demand is met by the initial player
-            if (demandedCard !== '-' && card.rank === demandedCard && playerIndex === initialJackPlayerIndex) {
-                demandMetByInitialPlayer = true;
-            }
-            
-            card.playEffect({
-                currentPlayerIndex,
-                numPlayers,
-                players,
-                updateLog,
-                skipTurn
-            });
-
-            updatePenaltyDisplay();
-            updateBlockDisplay();
-
-            if (players[playerIndex].hand.length === 0) {
-                updateLog(`${players[playerIndex].name} wins the game!`);
-                endGame();
-            }
-
-            hasPlayedCardThisTurn = true;
-
-            document.getElementById('draw-card-btn').disabled = true;
-            document.getElementById('end-turn-btn').disabled = false;
-
-            return true;
-        }
+        return true;
     } else {
-        alert(`You cannot play this card.`);
+        alert(`Invalid move! You cannot play this card.`);
         return false;
     }
 }
