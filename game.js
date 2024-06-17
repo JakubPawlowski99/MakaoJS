@@ -109,10 +109,12 @@ export function selectSuit(suit) {
     document.getElementById('suit-selection-modal').style.display = 'none';
     document.getElementById('demand-display').textContent = `Demand: ${suit}`;
 
-    // Enable the "End Turn" button after selecting a suit
     document.getElementById('end-turn-btn').disabled = false;
-    document.getElementById('draw-card-btn').disabled = true; // Disable the "Draw Card" button
+    document.getElementById('draw-card-btn').disabled = true;
 }
+
+// Expose selectSuit function to the global scope
+window.selectSuit = selectSuit;
 
 export function enforceDemand(card) {
     if (demandedSuit && card.suit !== demandedSuit) {
@@ -370,5 +372,3 @@ function endGame() {
     alert("Game Over");
 }
 
-// Expose selectSuit function to the global scope
-window.selectSuit = selectSuit;
