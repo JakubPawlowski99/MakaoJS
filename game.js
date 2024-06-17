@@ -267,6 +267,9 @@ export function playCard(playerIndex, cardIndex) {
             return true; // Allow the player to end their turn after selecting suit
         } else if (card.rank === '4') {
             increaseBlockCounter();
+        } else if (card.rank === 'Q') {
+            // Queen can be played on any normal card; no special effect beyond normal play
+            // Already handled by isValidMove
         }
 
         hasPlayedCardThisTurn = true; // Set hasPlayedCardThisTurn to true after playing a valid card
@@ -291,6 +294,8 @@ export function playCard(playerIndex, cardIndex) {
         return false;
     }
 }
+
+
 export function nextTurn() {
     if (blockCounter > 0) {
         if (!hasPlayedCardThisTurn) {

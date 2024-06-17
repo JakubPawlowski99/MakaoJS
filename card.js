@@ -8,22 +8,33 @@ export class Card {
     }
 
     isValidMove(centerCard, demandedCard, demandedSuit) {
-        // Handle Ace card special case
+        // Handle special case for Ace card
         if (this.rank === 'A') {
-            // Check if the card's suit matches the demanded suit (if any)
             if (demandedSuit && this.suit !== demandedSuit) {
                 return false;
             }
-        } else {
-            // For other cards, check if the rank or suit matches the center card or demanded card/suit
-            if (centerCard && this.rank !== centerCard.rank && this.suit !== centerCard.suit) {
-                if (!(centerCard.rank === 'J' && this.rank === demandedCard) && this.rank !== demandedCard && this.suit !== demandedSuit) {
-                    return false;
-                }
-            }
+            return true;
         }
 
-        return true;
+        // Handle special case for Queen card
+        if (this.rank === 'Q') {
+            // Can be played on any non-special card (non-block, non-draw) regardless of suit/rank
+            if (['2', '3', '4', 'J'].includes(centerCard.rank)) {
+                return false;
+            }
+            return true;
+        }
+
+        // Check for demanded suit or card
+        if (demandedSuit && this.suit !== demandedSuit) {
+            return false;
+        }
+        if (demandedCard !== '-' && this.rank !== demandedCard) {
+            return false;
+        }
+
+        // Normal card matching rules
+        return this.suit === centerCard.suit || this.rank === centerCard.rank;
     }
 
     playEffect(game) {
