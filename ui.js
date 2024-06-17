@@ -44,9 +44,11 @@ function updateCurrentPlayerDisplay() {
 export function createCardElement(card) {
     const cardElement = document.createElement('div');
     cardElement.classList.add('card');
+
     const rankElement = document.createElement('div');
     rankElement.classList.add('rank');
     rankElement.textContent = card.rank;
+
     const suitElement = document.createElement('img');
     suitElement.classList.add('suit');
     suitElement.src = `suits/${card.suit}.png`;
@@ -56,10 +58,12 @@ export function createCardElement(card) {
         suitElement.style.filter = 'invert(20%) sepia(96%) saturate(2701%) hue-rotate(324deg) brightness(91%) contrast(102%)';
         rankElement.style.color = 'red';
     } else {
+        suitElement.style.filter = 'none'; // Reset filter for black suits
         rankElement.style.color = 'black';
     }
 
     cardElement.appendChild(rankElement);
     cardElement.appendChild(suitElement);
+
     return cardElement;
 }
